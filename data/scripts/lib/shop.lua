@@ -22,6 +22,7 @@ function new()
     instance.boughtItemIcons = {}
 
     instance.pageLabel = 0
+	instance.pageLabelBuy = 0
 
     instance.buybackItemFrames = {}
     instance.buybackItemNameLabels = {}
@@ -144,7 +145,7 @@ function Shop:updateSellGui() -- client
     end
 	
 	--TODO: Implement paging
-	--self.pageLabel.caption = itemStart .. " - " .. itemEnd .. " / " .. numDifferentItems
+	self.pageLabelBuy.caption = itemStart .. " - " .. itemEnd .. " / " .. numDifferentItems
 end
 
 
@@ -165,10 +166,10 @@ function Shop:buildGui(window, guiType) -- client
 		window:createButton(Rect(0, 50 + 35 * 15, 70, 80 + 35 * 15), "<", "onLeftButtonPressedBuy")
         window:createButton(Rect(size.x - 70, 50 + 35 * 15, 60 + size.x - 60, 80 + 35 * 15), ">", "onRightButtonPressedBuy")
 
-        self.pageLabel = window:createLabel(vec2(10, 50 + 35 * 15), "", 20)
-        self.pageLabel.lower = vec2(pos.x + 10, pos.y + 50 + 35 * 15)
-        self.pageLabel.upper = vec2(pos.x + size.x - 70, pos.y + 75)
-        self.pageLabel.centered = 1
+        self.pageLabelBuy = window:createLabel(vec2(10, 50 + 35 * 15), "", 20)
+        self.pageLabelBuy.lower = vec2(pos.x + 10, pos.y + 50 + 35 * 15)
+        self.pageLabelBuy.upper = vec2(pos.x + size.x - 70, pos.y + 75)
+        self.pageLabelBuy.centered = 1
     elseif guiType == 1 then
         buttonCaption = "Sell"%_t
         buttonCallback = "onSellButtonPressed"
