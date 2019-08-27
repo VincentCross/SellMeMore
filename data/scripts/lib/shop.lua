@@ -1,10 +1,60 @@
+function new()
+    local instance = {}
+
+    instance.ItemWrapper = SellableInventoryItem
+    instance.tax = 0.2
+
+    -- UI
+    instance.soldItemFrames = {}
+    instance.soldItemNameLabels = {}
+    instance.soldItemPriceLabels = {}
+    instance.soldItemMaterialLabels = {}
+    instance.soldItemStockLabels = {}
+    instance.soldItemButtons = {}
+    instance.soldItemIcons = {}
+
+    instance.boughtItemFrames = {}
+    instance.boughtItemNameLabels = {}
+    instance.boughtItemPriceLabels = {}
+    instance.boughtItemMaterialLabels = {}
+    instance.boughtItemStockLabels = {}
+    instance.boughtItemButtons = {}
+    instance.boughtItemIcons = {}
+
+    instance.pageLabel = 0
+
+    instance.buybackItemFrames = {}
+    instance.buybackItemNameLabels = {}
+    instance.buybackItemPriceLabels = {}
+    instance.buybackItemMaterialLabels = {}
+    instance.buybackItemStockLabels = {}
+    instance.buybackItemButtons = {}
+    instance.buybackItemIcons = {}
+
+    instance.itemsPerPage = 15
+
+    instance.soldItems = {}
+    instance.boughtItems = {}
+    instance.buybackItems = {}
+
+    instance.boughtItemsPage = 0
+	instance.soldItemsPage = 0
+
+    instance.guiInitialized = false
+
+    instance.buyTab = nil
+    instance.sellTab = nil
+    instance.buyBackTab = nil
+
+    return setmetatable(instance, Shop)
+end
+
 -- update the buy tab (the tab where the STATION SELLS)
 function Shop:updateSellGui() -- client
 
     if not self.guiInitialized then return end
 	
 	local numDifferentItems = #self.soldItems
-	self.soldItemsPage = 0 -- TODO: Remove hardcoding of soldItemsPage
 	
 	while self.soldItemsPage * self.itemsPerPage >= numDifferentItems do
 		self.soldItemsPage = self.soldItemsPage - 1
@@ -44,43 +94,46 @@ function Shop:updateSellGui() -- client
         end
 	
 		-- TODO: Remove debug printing.
-		print("updateSellGui.index")
-		print(index)
+		print("updateSellGui.index: %i", index)
 		-- Index is going out of bounds on 16th call to below. soldItemFrames is an object created in Shop.new. 
 		-- It is set in Shop.buildGui. buildGui has only looped 15 times, so the 16th is not created. 
 		-- But it looks like pairs(self.soldItems) is higher. Which makes sense since 20+ items are being sold.
 		-- Theoretically buildGui is used by both buying and selling, so supports only 15 loops. Does that mean
 		-- this loop is assuming only 15 items? Whatever the cause, updateBuyGui can handle more than 15 so theoretically
 		-- if I copy that, it'll solve this indexing issue. Problem is the updateBuyGui uses boughtItemsPage and paging
-		-- for selling is not in yet. So will try hardcoding it for now. TODO: Remove comment
-        self.soldItemFrames[index]:show()
-        self.soldItemNameLabels[index]:show()
-        self.soldItemPriceLabels[index]:show()
-        self.soldItemMaterialLabels[index]:show()
-        self.soldItemStockLabels[index]:show()
-        self.soldItemButtons[index]:show()
-        self.soldItemIcons[index]:show()
+		-- for selling is not in yet. So will try hardcoding it for now.
+		--
+		-- Paging should now be working dynamically. As evidenced by the fact that the index was originally only looping to 15.
+		-- But after pressing the right button, the index then goes up to 16. But it is unfortunately going out of bounds on
+		-- soldItemFrames again (and presumably more below). TODO: Remove comments.
+        self.soldItemFrames[uiIndex]:show()
+        self.soldItemNameLabels[uiIndex]:show()
+        self.soldItemPriceLabels[uiIndex]:show()
+        self.soldItemMaterialLabels[uiIndex]:show()
+        self.soldItemStockLabels[uiIndex]:show()
+        self.soldItemButtons[uiIndex]:show()
+        self.soldItemIcons[uiIndex]:show()
 
-        self.soldItemNameLabels[index].caption = item.name
-        self.soldItemNameLabels[index].color = item.rarity.color
-        self.soldItemNameLabels[index].bold = false
+        self.soldItemNameLabels[uiIndex].caption = item.name
+        self.soldItemNameLabels[uiIndex].color = item.rarity.color
+        self.soldItemNameLabels[uiIndex].bold = false
 
         if item.material then
-            self.soldItemMaterialLabels[index].caption = item.material.name
-            self.soldItemMaterialLabels[index].color = item.material.color
+            self.soldItemMaterialLabels[uiIndex].caption = item.material.name
+            self.soldItemMaterialLabels[uiIndex].color = item.material.color
         else
-            self.soldItemMaterialLabels[index]:hide()
+            self.soldItemMaterialLabels[uiIndex]:hide()
         end
 
         if item.icon then
-            self.soldItemIcons[index].picture = item.icon
-            self.soldItemIcons[index].color = item.rarity.color
+            self.soldItemIcons[uiIndex].picture = item.icon
+            self.soldItemIcons[uiIndex].color = item.rarity.color
         end
 
         local price = self:getSellPriceAndTax(item.price, faction, buyer)
-        self.soldItemPriceLabels[index].caption = createMonetaryString(price)
+        self.soldItemPriceLabels[uiIndex].caption = createMonetaryString(price)
 
-        self.soldItemStockLabels[index].caption = item.amount
+        self.soldItemStockLabels[uiIndex].caption = item.amount
 		
 		uiIndex = uiIndex + 1
     end
@@ -109,8 +162,8 @@ function Shop:buildGui(window, guiType) -- client
         buttonCaption = "Buy"%_t
         buttonCallback = "onBuyButtonPressed"
 		
-		window:createButton(Rect(0, 50 + 35 * 15, 70, 80 + 35 * 15), "<", "onLeftButtonPressed")
-        window:createButton(Rect(size.x - 70, 50 + 35 * 15, 60 + size.x - 60, 80 + 35 * 15), ">", "onRightButtonPressed")
+		window:createButton(Rect(0, 50 + 35 * 15, 70, 80 + 35 * 15), "<", "onLeftButtonPressedBuy")
+        window:createButton(Rect(size.x - 70, 50 + 35 * 15, 60 + size.x - 60, 80 + 35 * 15), ">", "onRightButtonPressedBuy")
 
         self.pageLabel = window:createLabel(vec2(10, 50 + 35 * 15), "", 20)
         self.pageLabel.lower = vec2(pos.x + 10, pos.y + 50 + 35 * 15)
@@ -205,4 +258,81 @@ function Shop:buildGui(window, guiType) -- client
         y = y + 35
     end
 
+end
+
+function Shop:onLeftButtonPressedBuy()
+    --TODO: Remove printing.
+	print("onLeftButtonPressed soldItemsPage before: %i", self.soldItemsPage)
+	self.soldItemsPage = self.soldItemsPage - 1
+	print("onLeftButtonPressed soldItemsPage after: %i", self.soldItemsPage)
+    self:updateSellGui()
+end
+
+function Shop:onRightButtonPressedBuy()
+	--TODO: Remove printing.
+    print("onRightButtonPressed soldItemsPage before: %i", self.soldItemsPage)
+	self.soldItemsPage = self.soldItemsPage + 1
+	print("onRightButtonPressed soldItemsPage after: %i", self.soldItemsPage)
+    self:updateSellGui()
+end
+
+function Shop:onShowWindow()
+
+    self.boughtItemsPage = 0
+	self.soldItemsPage = 0
+	
+	--TODO: Remove printing.
+	print("onShowWindow: %i", self.soldItemsPage)
+
+    self:updatePlayerItems()
+    self:updateBuyGui()
+    self:updateBuybackGui()
+	self:updateSellGui()
+
+    self.tabbedWindow:selectTab(self.buyTab)
+end
+
+function PublicNamespace.CreateNamespace()
+    local result = {}
+
+    local shop = PublicNamespace.CreateShop()
+
+    shop.shared = PublicNamespace
+    result.shop = shop
+    result.onShowWindow = function(...) return shop:onShowWindow(...) end
+    result.sendItems = function(...) return shop:sendItems(...) end
+    result.receiveSoldItems = function(...) return shop:receiveSoldItems(...) end
+    result.sellToPlayer = function(...) return shop:sellToPlayer(...) end
+    result.buyFromPlayer = function(...) return shop:buyFromPlayer(...) end
+    result.buyTrashFromPlayer = function(...) return shop:buyTrashFromPlayer(...) end
+    result.sellBackToPlayer = function(...) return shop:sellBackToPlayer(...) end
+    result.updateBoughtItem = function(...) return shop:updateBoughtItem(...) end
+    result.onLeftButtonPressed = function(...) return shop:onLeftButtonPressed(...) end
+    result.onRightButtonPressed = function(...) return shop:onRightButtonPressed(...) end
+	result.onLeftButtonPressedBuy = function(...) return shop:onLeftButtonPressedBuy(...) end
+    result.onRightButtonPressedBuy = function(...) return shop:onRightButtonPressedBuy(...) end
+    result.onBuyButtonPressed = function(...) return shop:onBuyButtonPressed(...) end
+    result.onSellButtonPressed = function(...) return shop:onSellButtonPressed(...) end
+    result.onSellTrashButtonPressed = function(...) return shop:onSellTrashButtonPressed(...) end
+    result.onBuybackButtonPressed = function(...) return shop:onBuybackButtonPressed(...) end
+    result.renderUI = function(...) return shop:renderUI(...) end
+    result.onMouseEvent = function(...) return shop:onMouseEvent(...) end
+    result.onKeyboardEvent = function(...) return shop:onKeyboardEvent(...) end
+    result.add = function(...) return shop:add(...) end
+    result.addFront = function(...) return shop:addFront(...) end
+    result.getBuyPrice = function(...) return shop.getBuyPrice(...) end
+    result.getNumSoldItems = function() return shop:getNumSoldItems() end
+    result.getNumBuybackItems = function() return shop:getNumBuybackItems() end
+    result.getSoldItemPrice = function(...) return shop:getSoldItemPrice(...) end
+    result.getBoughtItemPrice = function(...) return shop:getBoughtItemPrice(...) end
+    result.getTax = function() return shop:getTax() end
+
+    -- Dynamic Namespace result
+    callable(result, "buyFromPlayer")
+    callable(result, "buyTrashFromPlayer")
+    callable(result, "sellBackToPlayer")
+    callable(result, "sellToPlayer")
+    callable(result, "sendItems")
+
+    return result
 end
