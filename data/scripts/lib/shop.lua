@@ -86,27 +86,12 @@ function Shop:updateSellGui() -- client
     local uiIndex = 1
 
     for index = itemStart, itemEnd do
-    -- TODO: Remove existing for index
-	--for index, item in pairs(self.soldItems) do
 		local item = self.soldItems[index]
 
         if item == nil then
             break
         end
 	
-		-- TODO: Remove debug printing.
-		print("updateSellGui.index: %i", index)
-		-- Index is going out of bounds on 16th call to below. soldItemFrames is an object created in Shop.new. 
-		-- It is set in Shop.buildGui. buildGui has only looped 15 times, so the 16th is not created. 
-		-- But it looks like pairs(self.soldItems) is higher. Which makes sense since 20+ items are being sold.
-		-- Theoretically buildGui is used by both buying and selling, so supports only 15 loops. Does that mean
-		-- this loop is assuming only 15 items? Whatever the cause, updateBuyGui can handle more than 15 so theoretically
-		-- if I copy that, it'll solve this indexing issue. Problem is the updateBuyGui uses boughtItemsPage and paging
-		-- for selling is not in yet. So will try hardcoding it for now.
-		--
-		-- Paging should now be working dynamically. As evidenced by the fact that the index was originally only looping to 15.
-		-- But after pressing the right button, the index then goes up to 16. But it is unfortunately going out of bounds on
-		-- soldItemFrames again (and presumably more below). TODO: Remove comments.
         self.soldItemFrames[uiIndex]:show()
         self.soldItemNameLabels[uiIndex]:show()
         self.soldItemPriceLabels[uiIndex]:show()
@@ -144,7 +129,6 @@ function Shop:updateSellGui() -- client
         itemStart = 0
     end
 	
-	--TODO: Implement paging
 	self.pageLabelBuy.caption = itemStart .. " - " .. itemEnd .. " / " .. numDifferentItems
 end
 
@@ -262,18 +246,12 @@ function Shop:buildGui(window, guiType) -- client
 end
 
 function Shop:onLeftButtonPressedBuy()
-    --TODO: Remove printing.
-	print("onLeftButtonPressed soldItemsPage before: %i", self.soldItemsPage)
 	self.soldItemsPage = self.soldItemsPage - 1
-	print("onLeftButtonPressed soldItemsPage after: %i", self.soldItemsPage)
     self:updateSellGui()
 end
 
 function Shop:onRightButtonPressedBuy()
-	--TODO: Remove printing.
-    print("onRightButtonPressed soldItemsPage before: %i", self.soldItemsPage)
 	self.soldItemsPage = self.soldItemsPage + 1
-	print("onRightButtonPressed soldItemsPage after: %i", self.soldItemsPage)
     self:updateSellGui()
 end
 
@@ -281,9 +259,6 @@ function Shop:onShowWindow()
 
     self.boughtItemsPage = 0
 	self.soldItemsPage = 0
-	
-	--TODO: Remove printing.
-	print("onShowWindow: %i", self.soldItemsPage)
 
     self:updatePlayerItems()
     self:updateBuyGui()
