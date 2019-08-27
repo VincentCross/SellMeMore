@@ -35,13 +35,15 @@ function Shop:updateSellGui() -- client
     local uiIndex = 1
 
     for index = itemStart, itemEnd do
-    --for index, item in pairs(self.soldItems) do
+    -- TODO: Remove existing for index
+	--for index, item in pairs(self.soldItems) do
 		local item = self.soldItems[index]
 
         if item == nil then
             break
         end
 	
+		-- TODO: Remove debug printing.
 		print("updateSellGui.index")
 		print(index)
 		-- Index is going out of bounds on 16th call to below. soldItemFrames is an object created in Shop.new. 
@@ -50,7 +52,7 @@ function Shop:updateSellGui() -- client
 		-- Theoretically buildGui is used by both buying and selling, so supports only 15 loops. Does that mean
 		-- this loop is assuming only 15 items? Whatever the cause, updateBuyGui can handle more than 15 so theoretically
 		-- if I copy that, it'll solve this indexing issue. Problem is the updateBuyGui uses boughtItemsPage and paging
-		-- for selling is not in yet. So will try hardcoding it for now.		
+		-- for selling is not in yet. So will try hardcoding it for now. TODO: Remove comment
         self.soldItemFrames[index]:show()
         self.soldItemNameLabels[index]:show()
         self.soldItemPriceLabels[index]:show()
@@ -90,4 +92,117 @@ function Shop:updateSellGui() -- client
 	
 	--TODO: Implement paging
 	--self.pageLabel.caption = itemStart .. " - " .. itemEnd .. " / " .. numDifferentItems
+end
+
+
+function Shop:buildGui(window, guiType) -- client
+
+    local buttonCaption = ""
+    local buttonCallback = ""
+
+    local size = window.size
+    local pos = window.lower
+
+--    window:createFrame(Rect(size))
+
+    if guiType == 0 then
+        buttonCaption = "Buy"%_t
+        buttonCallback = "onBuyButtonPressed"
+		
+		window:createButton(Rect(0, 50 + 35 * 15, 70, 80 + 35 * 15), "<", "onLeftButtonPressed")
+        window:createButton(Rect(size.x - 70, 50 + 35 * 15, 60 + size.x - 60, 80 + 35 * 15), ">", "onRightButtonPressed")
+
+        self.pageLabel = window:createLabel(vec2(10, 50 + 35 * 15), "", 20)
+        self.pageLabel.lower = vec2(pos.x + 10, pos.y + 50 + 35 * 15)
+        self.pageLabel.upper = vec2(pos.x + size.x - 70, pos.y + 75)
+        self.pageLabel.centered = 1
+    elseif guiType == 1 then
+        buttonCaption = "Sell"%_t
+        buttonCallback = "onSellButtonPressed"
+
+        window:createButton(Rect(0, 50 + 35 * 15, 70, 80 + 35 * 15), "<", "onLeftButtonPressed")
+        window:createButton(Rect(size.x - 70, 50 + 35 * 15, 60 + size.x - 60, 80 + 35 * 15), ">", "onRightButtonPressed")
+
+        self.pageLabel = window:createLabel(vec2(10, 50 + 35 * 15), "", 20)
+        self.pageLabel.lower = vec2(pos.x + 10, pos.y + 50 + 35 * 15)
+        self.pageLabel.upper = vec2(pos.x + size.x - 70, pos.y + 75)
+        self.pageLabel.centered = 1
+    else
+        buttonCaption = "Buy"%_t
+        buttonCallback = "onBuybackButtonPressed"
+    end
+
+    local pictureX = 20
+    local nameX = 60
+    local materialX = 480
+    local stockX = 560
+    local priceX = 600
+    local buttonX = 720
+
+    -- header
+    window:createLabel(vec2(nameX, 0), "Name"%_t, 15)
+    window:createLabel(vec2(materialX, 0), "Mat"%_t, 15)
+    window:createLabel(vec2(priceX, 0), "Cr"%_t, 15)
+    window:createLabel(vec2(stockX, 0), "#"%_t, 15)
+
+    local y = 35
+
+    if guiType == 1 then
+        local button = window:createButton(Rect(buttonX, 0, 160 + buttonX, 30), "Sell Trash"%_t, "onSellTrashButtonPressed")
+        button.maxTextSize = 15
+    end
+
+    for i = 1, self.itemsPerPage do
+
+        local yText = y + 6
+
+        local frame = window:createFrame(Rect(0, y, buttonX - 10, 30 + y))
+
+        local nameLabel = window:createLabel(vec2(nameX, yText), "", 15)
+        local priceLabel = window:createLabel(vec2(priceX, yText), "", 15)
+        local materialLabel = window:createLabel(vec2(materialX, yText), "", 15)
+        local stockLabel = window:createLabel(vec2(stockX, yText), "", 15)
+        local button = window:createButton(Rect(buttonX, y, 160 + buttonX, 30 + y), buttonCaption, buttonCallback)
+        local icon = window:createPicture(Rect(pictureX, yText - 5, 29 + pictureX, 29 + yText - 5), "")
+
+        button.maxTextSize = 15
+        icon.isIcon = 1
+
+        if guiType == 0 then
+            table.insert(self.soldItemFrames, frame)
+            table.insert(self.soldItemNameLabels, nameLabel)
+            table.insert(self.soldItemPriceLabels, priceLabel)
+            table.insert(self.soldItemMaterialLabels, materialLabel)
+            table.insert(self.soldItemStockLabels, stockLabel)
+            table.insert(self.soldItemButtons, button)
+            table.insert(self.soldItemIcons, icon)
+        elseif guiType == 1 then
+            table.insert(self.boughtItemFrames, frame)
+            table.insert(self.boughtItemNameLabels, nameLabel)
+            table.insert(self.boughtItemPriceLabels, priceLabel)
+            table.insert(self.boughtItemMaterialLabels, materialLabel)
+            table.insert(self.boughtItemStockLabels, stockLabel)
+            table.insert(self.boughtItemButtons, button)
+            table.insert(self.boughtItemIcons, icon)
+        elseif guiType == 2 then
+            table.insert(self.buybackItemFrames, frame)
+            table.insert(self.buybackItemNameLabels, nameLabel)
+            table.insert(self.buybackItemPriceLabels, priceLabel)
+            table.insert(self.buybackItemMaterialLabels, materialLabel)
+            table.insert(self.buybackItemStockLabels, stockLabel)
+            table.insert(self.buybackItemButtons, button)
+            table.insert(self.buybackItemIcons, icon)
+        end
+
+        frame:hide();
+        nameLabel:hide();
+        priceLabel:hide();
+        materialLabel:hide();
+        stockLabel:hide();
+        button:hide();
+        icon:hide();
+
+        y = y + 35
+    end
+
 end
