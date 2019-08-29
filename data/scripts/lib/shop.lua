@@ -312,3 +312,236 @@ function PublicNamespace.CreateNamespace()
 
     return result
 end
+
+
+function Shop:onMouseEvent(key, pressed, x, y)
+    if not pressed then return false end
+    if not self.shared.window.visible then return false end
+    if not self.tabbedWindow.visible then return false end
+
+    if not (Keyboard():keyPressed(KeyboardKey.LControl) or Keyboard():keyPressed(KeyboardKey.RControl)) then return false end
+
+    if self.tabbedWindow:getActiveTab().index == self.buyTab.index then
+        for i, frame in pairs(self.soldItemFrames) do
+
+			local index = i + self.soldItemsPage * self.itemsPerPage
+
+            if self.soldItems[index] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if x >= l.x and x <= u.x then
+                    if y >= l.y and y <= u.y then
+                        Player():sendChatMessage(self.soldItems[index].item)
+                        return true
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.sellTab.index then
+
+        for i, frame in pairs(self.boughtItemFrames) do
+
+            local index = i + self.boughtItemsPage * self.itemsPerPage
+
+            if self.boughtItems[index] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if x >= l.x and x <= u.x then
+                    if y >= l.y and y <= u.y then
+                        Player():sendChatMessage(self.boughtItems[index].item)
+                        return true
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.buyBackTab.index then
+
+        for i, frame in pairs(self.buybackItemFrames) do
+
+            if self.buybackItems[i] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if x >= l.x and x <= u.x then
+                    if y >= l.y and y <= u.y then
+                        Player():sendChatMessage(self.buybackItems[i].item)
+                        return true
+                    end
+                    end
+                end
+            end
+        end
+
+    end
+
+end
+
+
+-- this function gets called whenever the ui window gets rendered, AFTER the window was rendered (client only)
+function Shop:onKeyboardEvent(key, pressed)
+
+    if not pressed then return false end
+    if key ~= KeyboardKey._E then return false end
+    if not self.shared.window.visible then return false end
+    if not self.tabbedWindow.visible then return false end
+
+    local mouse = Mouse().position
+
+    if self.tabbedWindow:getActiveTab().index == self.buyTab.index then
+        for i, frame in pairs(self.soldItemFrames) do
+
+			local index = i + self.boughtItemsPage * self.itemsPerPage
+
+            if self.soldItems[index] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        Player():addComparisonItem(self.soldItems[index].item)
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.sellTab.index then
+
+        for i, frame in pairs(self.boughtItemFrames) do
+
+            local index = i + self.boughtItemsPage * self.itemsPerPage
+
+            if self.boughtItems[index] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        Player():addComparisonItem(self.boughtItems[i].item)
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.buyBackTab.index then
+
+        for i, frame in pairs(self.buybackItemFrames) do
+
+            if self.buybackItems[i] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        Player():addComparisonItem(self.buybackItems[i].item)
+                    end
+                    end
+                end
+            end
+        end
+
+    end
+end
+
+
+-- this function gets called whenever the ui window gets rendered, AFTER the window was rendered (client only)
+function Shop:renderUI()
+
+    local mouse = Mouse().position
+
+    if self.tabbedWindow:getActiveTab().index == self.buyTab.index then
+        for i, frame in pairs(self.soldItemFrames) do
+
+			local index = i + self.soldItemsPage * self.itemsPerPage
+
+            if self.soldItems[index] ~= nil then
+                if frame.visible then					
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        local renderer = TooltipRenderer(self.soldItems[index]:getTooltip())
+                        renderer:drawMouseTooltip(Mouse().position)
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.sellTab.index then
+
+        for i, frame in pairs(self.boughtItemFrames) do
+
+            local index = i + self.boughtItemsPage * self.itemsPerPage
+
+            if self.boughtItems[index] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        local renderer = TooltipRenderer(self.boughtItems[index]:getTooltip())
+                        renderer:drawMouseTooltip(Mouse().position)
+                    end
+                    end
+                end
+            end
+        end
+
+    elseif self.tabbedWindow:getActiveTab().index == self.buyBackTab.index then
+
+        for i, frame in pairs(self.buybackItemFrames) do
+
+            if self.buybackItems[i] ~= nil then
+                if frame.visible then
+
+                    local l = frame.lower
+                    local u = frame.upper
+
+                    if mouse.x >= l.x and mouse.x <= u.x then
+                    if mouse.y >= l.y and mouse.y <= u.y then
+                        local renderer = TooltipRenderer(self.buybackItems[i]:getTooltip())
+                        renderer:drawMouseTooltip(Mouse().position)
+                    end
+                    end
+                end
+            end
+        end
+
+    end
+end
+
+
+function Shop:onBuyButtonPressed(button) -- client
+    local itemIndex = 0
+    for i, b in pairs(self.soldItemButtons) do
+        if button.index == b.index then
+            itemIndex = self.soldItemsPage * self.itemsPerPage + i
+        end
+    end
+
+    invokeServerFunction("sellToPlayer", itemIndex)
+end
