@@ -9,6 +9,16 @@ function TurretMerchant.shop:addItems()
 
     -- create all turrets
     local turrets = {}
+	
+	if randomSoldEquipmentBool then
+		if randomSoldEquipmentMin >= 1 and randomSoldEquipmentMin < randomSoldEquipmentMax then
+			--Overwrites the flat value in the config
+			amountTurretsSold = math.random(randomSoldEquipmentMin, randomSoldEquipmentMax)
+		else
+			eprint("SellMeMore.equipmentdock ERROR: randomSoldEquipmentMin must be greater than one and less than randomSoldEquipmentMax")
+			eprint("SellMeMore.equipmentdock ERROR: Using flat value of %i", amountTurretsSold)
+		end
+	end
 
     for i = 1, amountTurretsSold do
         local turret = InventoryTurret(TurretGenerator.generate(Sector():getCoordinates()))

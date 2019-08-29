@@ -1,6 +1,6 @@
-amountSystemsSold = 24
-amountTurretsSold = 20
+amountSystemsSold = 20
+amountTurretsSold = 24
 -- Overwrites above if true
-randomSoldEquipmentAmounts = true
+randomSoldEquipmentBool = true
 randomSoldEquipmentMin = 10
 randomSoldEquipmentMax = 24

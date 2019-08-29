@@ -8,6 +8,17 @@ function EquipmentDock.shop:addItems()
 
     local counter = 0
     local systems = {}
+	
+	if randomSoldEquipmentBool then
+		if randomSoldEquipmentMin >= 1 and randomSoldEquipmentMin < randomSoldEquipmentMax then
+			--Overwrites the flat value in the config
+			amountSystemsSold = math.random(randomSoldEquipmentMin, randomSoldEquipmentMax)
+		else
+			eprint("SellMeMore.equipmentdock ERROR: randomSoldEquipmentMin must be greater than one and less than randomSoldEquipmentMax")
+			eprint("SellMeMore.equipmentdock ERROR: Using flat value of %i", amountSystemsSold)
+		end
+	end
+	
     while counter < amountSystemsSold do
 
         local x, y = Sector():getCoordinates()
