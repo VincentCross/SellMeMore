@@ -1,3 +1,7 @@
+package.path = package.path .. ";data/config/?.lua"
+
+include ("sellMeMoreConfig")
+
 function TurretMerchant.shop:addItems()
 
     -- simply init with a 'random' seed
@@ -6,7 +10,7 @@ function TurretMerchant.shop:addItems()
     -- create all turrets
     local turrets = {}
 
-    for i = 1, 20 do
+    for i = 1, amountTurretsSold do
         local turret = InventoryTurret(TurretGenerator.generate(Sector():getCoordinates()))
 
         local pair = {}

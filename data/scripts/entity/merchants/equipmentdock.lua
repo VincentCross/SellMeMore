@@ -1,10 +1,14 @@
+package.path = package.path .. ";data/config/?.lua"
+
+include ("sellMeMoreConfig")
+
 function EquipmentDock.shop:addItems()
 
     UpgradeGenerator.initialize()
 
     local counter = 0
     local systems = {}
-    while counter < 24 do
+    while counter < amountSystemsSold do
 
         local x, y = Sector():getCoordinates()
         local rarities, weights = UpgradeGenerator.getSectorProbabilities(x, y)
